@@ -1,0 +1,12 @@
+{
+  "name": "hymn-app",
+  "version": "1.0.0",
+  "description": "A hymn book combining hymnals from multiple denominations.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.4.11"
+  }
+}

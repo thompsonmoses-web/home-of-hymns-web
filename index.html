@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home of Hymns</title>
+  <link rel="icon" type="image/svg+xml" href="emblem.svg">
+  <link rel="apple-touch-icon" href="assets/images/sing_logo.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div id="splash" class="overlay splash">
+    <div class="splash-inner">
+      <div class="splash-emblem">
+        <img class="logo" data-logo src="emblem.svg" alt="Home of Hymns">
+      </div>
+      <div class="splash-glyphs">
+        <svg class="bible-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          <line x1="12" y1="7" x2="12" y2="17"/>
+          <line x1="9" y1="10" x2="15" y2="10"/>
+        </svg>
+        <span class="splash-cross">✟</span>
+      </div>
+      <h1 class="splash-title">Home of Hymns</h1>
+      <p class="splash-sub">Timeless Hymns for Every Generation</p>
+      <div class="loader"></div>
+    </div>
+  </div>
+
+  <div id="entryGate" class="overlay entry-gate" hidden>
+    <div class="gate-card">
+      <div class="gate-emblem"><img class="logo" data-logo src="emblem.svg" alt="Home of Hymns"></div>
+      <h2 class="gate-title">Welcome to Home of Hymns</h2>
+      <p class="gate-sub">Enter your details to continue</p>
+      <form id="gateForm" novalidate>
+        <label class="gate-field">
+          <span>Full Name <b>*</b></span>
+          <input type="text" id="gateName" autocomplete="name" placeholder="e.g. John Adeyemi" maxlength="60" required>
+        </label>
+        <label class="gate-field">
+          <span>Phone or Email</span>
+          <input type="text" id="gateContact" autocomplete="tel" placeholder="Optional" maxlength="80">
+        </label>
+        <label class="gate-field">
+          <span>Church / Branch</span>
+          <input type="text" id="gateChurch" placeholder="Optional" maxlength="80">
+        </label>
+        <p class="gate-error" id="gateError" hidden>Please enter your name</p>
+        <button type="submit" class="gate-enter" id="gateEnter">Enter</button>
+      </form>
+      <p class="gate-note">Your details stay on this device.</p>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo" data-logo src="emblem.svg" alt="Home of Hymns">
+      <div class="brand-text">
+        <h1>Home of Hymns</h1>
+        <p>Timeless Hymns for Every Generation</p>
+      </div>
+    </div>
+
+    <div class="topbar-controls">
+      <button id="userChip" class="user-chip" hidden title="Your profile"></button>
+      <label class="font-control" title="Font size">
+        <span class="aa">Aa</span>
+        <input type="range" id="fontSize" min="14" max="34" value="19">
+      </label>
+      <label class="switch" title="Night mode">
+        <input type="checkbox" id="nightMode">
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg class="search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="search" placeholder="Search title, number, lyrics, author...">
+      </div>
+      <select id="langFilter" title="Filter by language">
+        <option value="all">All Languages</option>
+      </select>
+      <button id="jumpBtn" class="jump-btn" title="Jump to hymn number (/)"># <kbd>/</kbd></button>
+    </div>
+    <div class="jump" id="jumpBox" hidden>
+      <span class="jump-prefix">#</span>
+      <input id="jumpInput" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="Number" maxlength="4">
+      <span id="jumpPreview" class="jump-preview"></span>
+    </div>
+    <div id="view" class="view"></div>
+    <div id="collectionList" class="collection-strip hidden-rail" hidden></div>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Views">
+    <button class="nav-item active" data-view="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" data-view="hymns">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+      <span>Hymns</span>
+    </button>
+    <button class="nav-item" data-view="collections">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><rect x="14" y="14" width="7" height="7" rx="1.4"/></svg>
+      <span>Collections</span>
+    </button>
+    <button class="nav-item" data-view="library">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h13"/><path d="M3 12h9"/><path d="M3 16h13"/><path d="M19 6v12"/><path d="M21 8l-2-2-2 2"/></svg>
+      <span>Library</span>
+    </button>
+    <button class="nav-item" data-view="more">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.98 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.98a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01A1.7 1.7 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1.03z"/></svg>
+      <span>More</span>
+    </button>
+  </nav>
+
+  <script src="logo.js"></script>
+  <script src="data/hymns.js"></script>
+  <script src="data/tunes.js"></script>
+  <script src="data/tunes_meta.js"></script>
+  <script src="data/yo.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>
