@@ -121,7 +121,13 @@ function logoSrc() {
 }
 
 // logo.js resolves after first paint — re-render so every view shows the real logo
-document.addEventListener('logoresolved', () => { try { render(); } catch (e) { /* ignore */ } });
+document.addEventListener('logoresolved', () => {
+  try {
+    const gate = el('#entryGate');
+    if (gate && !gate.hidden && !gatePhoto) updateGateAvatar();
+    render();
+  } catch (e) { /* ignore */ }
+});
 
 function collectionName(id) {
   const c = collections.find((c) => c.id === id);
@@ -577,6 +583,7 @@ function renderMore() {
   const name = p && p.name ? String(p.name).trim() : '';
   const first = name ? name.split(/\s+/)[0] : '';
   const initial = name ? name[0].toUpperCase() : '';
+  const photo = p && p.photo ? p.photo : '';
   const sub = name ? (p.church || p.contact || 'Member') : 'Timeless Hymns for Every Generation';
   const favs = store.favorites.length;
   const recent = store.history.length;
@@ -585,7 +592,7 @@ function renderMore() {
   view.innerHTML = `
   <h1 class="view-title" style="color:var(--accent);border-bottom:3px solid var(--accent)">More</h1>
   <div class="more-head">
-    <div class="more-avatar ${initial ? 'has-initial' : ''}">${initial ? esc(initial) : `<img data-logo src="${logoSrc()}" alt="Home of Hymns">`}</div>
+    <div class="more-avatar ${photo ? 'has-photo' : initial ? 'has-initial' : ''}" data-avatar-upload title="Click to change your profile photo">${photo ? `<img src="${photo}" alt="Profile photo">` : initial ? esc(initial) : `<img data-logo src="${logoSrc()}" alt="Home of Hymns">`}</div>
     <div class="more-id"><b>${esc(first || 'Guest')}</b><small>${esc(sub)}</small></div>
     ${name ? `<button class="more-edit" data-edit-profile>Edit</button>` : `<button class="more-edit" data-edit-profile>Set up</button>`}
   </div>
@@ -1275,6 +1282,18 @@ view.addEventListener('click', (e) => {
 
   if (e.target.closest('[data-edit-profile]')) { openGate(); return; }
 
+  if (e.target.closest('[data-avatar-upload]')) {
+    pickProfilePhoto((dataUrl) => {
+      const p = loadUserProfile() || {};
+      p.photo = dataUrl;
+      saveUserProfile(p);
+      renderUserChip();
+      render();
+      toast('Profile photo updated');
+    });
+    return;
+  }
+
   const sectBtn = e.target.closest('[data-section]');
   if (sectBtn && state.view === 'collection') {
     state.section = sectBtn.dataset.section;
@@ -1471,6 +1490,72 @@ function startApp() {
 }
 
 /* ------------------------------------------------------------------
+ *  Profile photo — pick an image, crop to a square, keep it local
+ * ------------------------------------------------------------------ */
+
+let gatePhoto = null;
+let photoPicker = null;
+
+function pickProfilePhoto(cb) {
+  if (!photoPicker) {
+    photoPicker = document.createElement('input');
+    photoPicker.type = 'file';
+    photoPicker.accept = 'image/*';
+    document.body.appendChild(photoPicker);
+  }
+  photoPicker.value = '';
+  photoPicker.onchange = () => {
+    const f = photoPicker.files && photoPicker.files[0];
+    photoPicker.onchange = null;
+    if (f) cropToAvatar(f, cb);
+  };
+  photoPicker.click();
+}
+
+function cropToAvatar(file, cb) {
+  const fr = new FileReader();
+  fr.onerror = () => toast('Could not read that image');
+  fr.onload = () => {
+    const img = new Image();
+    img.onerror = () => toast('Unsupported image format');
+    img.onload = () => {
+      const S = 256;
+      try {
+        const c = document.createElement('canvas');
+        c.width = S;
+        c.height = S;
+        const ctx = c.getContext('2d');
+        const side = Math.min(img.width, img.height);
+        ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, S, S);
+        cb(c.toDataURL('image/jpeg', 0.85));
+      } catch (e) { toast('Could not read that image'); }
+    };
+    img.src = fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+
+function updateGateAvatar() {
+  const btn = el('#gateAvatar');
+  const img = btn && btn.querySelector('img');
+  if (!img) return;
+  const photo = gatePhoto || '';
+  if (photo) {
+    img.removeAttribute('data-logo');
+    img.src = photo;
+    img.classList.add('photo');
+    btn.title = 'Change profile photo';
+  } else {
+    img.setAttribute('data-logo', '');
+    img.src = logoSrc();
+    img.classList.remove('photo');
+    btn.title = 'Add a profile photo';
+  }
+  const rm = el('#gatePhotoRemove');
+  if (rm) rm.hidden = !photo;
+}
+
+/* ------------------------------------------------------------------
  *  Entry gate — user details are required before entering the app
  * ------------------------------------------------------------------ */
 
@@ -1489,7 +1574,7 @@ function renderUserChip() {
   if (!p || !p.name) { chip.hidden = true; return; }
   const first = String(p.name).trim().split(/\s+/)[0];
   chip.hidden = false;
-  chip.textContent = 'Welcome, ' + first;
+  chip.innerHTML = (p.photo ? `<img src="${p.photo}" alt="">` : '') + 'Welcome, ' + esc(first);
   chip.title = p.name + (p.church ? ' · ' + p.church : '') + ' — click to edit';
 }
 
@@ -1501,6 +1586,8 @@ function openGate() {
   el('#gateContact').value = p.contact || '';
   el('#gateChurch').value = p.church || '';
   el('#gateError').hidden = true;
+  gatePhoto = p.photo || '';
+  updateGateAvatar();
   gate.hidden = false;
   setTimeout(() => { const n = el('#gateName'); if (n) n.focus(); }, 60);
 }
@@ -1522,11 +1609,32 @@ function initGate() {
         name,
         contact: (el('#gateContact').value || '').trim(),
         church: (el('#gateChurch').value || '').trim(),
+        photo: gatePhoto || '',
         enteredAt: Date.now()
       });
       closeGate();
       renderUserChip();
+      render();
       toast('Welcome, ' + name.split(/\s+/)[0] + '!');
+    });
+  }
+  const avatar = el('#gateAvatar');
+  if (avatar && !avatar.dataset.bound) {
+    avatar.dataset.bound = '1';
+    avatar.addEventListener('click', () => {
+      pickProfilePhoto((dataUrl) => {
+        gatePhoto = dataUrl;
+        updateGateAvatar();
+        toast('Photo added — press Enter to save');
+      });
+    });
+  }
+  const rm = el('#gatePhotoRemove');
+  if (rm && !rm.dataset.bound) {
+    rm.dataset.bound = '1';
+    rm.addEventListener('click', () => {
+      gatePhoto = '';
+      updateGateAvatar();
     });
   }
   const chip = el('#userChip');

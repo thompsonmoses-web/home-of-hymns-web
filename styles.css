@@ -958,6 +958,17 @@ html[data-logo-source="official"] .splash-emblem .logo {
   animation: fadeUp 0.5s ease;
 }
 
+.gate-emblem {
+  position: relative;
+  display: inline-block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 .gate-emblem .logo {
   width: 74px;
   height: 74px;
@@ -966,7 +977,52 @@ html[data-logo-source="official"] .splash-emblem .logo {
   object-fit: contain;
   background: #fff;
   box-shadow: 0 14px 36px rgba(15, 79, 176, 0.45), 0 0 44px rgba(240, 189, 38, 0.16);
+  transition: transform 0.2s ease;
 }
+
+.gate-emblem:hover .logo,
+.gate-emblem:focus-visible .logo { transform: translateY(-1px) scale(1.04); }
+
+/* user's own photo fills the frame */
+.gate-emblem .logo.photo {
+  padding: 0;
+  background: none;
+  object-fit: cover;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+}
+
+.gate-emblem .photo-badge {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: var(--accent, #f59e0b);
+  color: #fff;
+  font-size: 13px;
+  line-height: 27px;
+  text-align: center;
+  border: 2px solid var(--panel);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.gate-photo-remove {
+  display: block;
+  margin: 8px auto 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-soft);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.gate-photo-remove:hover { color: var(--accent-text, #dc2626); }
+.gate-photo-remove[hidden] { display: none; }
 
 /* official logo IS the tile — drop the white frame behind it */
 html[data-logo-source="official"] .gate-emblem .logo {
@@ -1073,6 +1129,14 @@ html[data-logo-source="official"] .gate-emblem .logo {
 
 .user-chip:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--panel-2)); }
 .user-chip[hidden] { display: none; }
+.user-chip img {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: -4px;
+  margin-right: 5px;
+}
 
 /* ============ Bottom nav ============ */
 
@@ -1550,6 +1614,7 @@ html[data-logo-source="official"] .featured-cross img {
 }
 
 .more-avatar {
+  position: relative;
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -1564,17 +1629,33 @@ html[data-logo-source="official"] .featured-cross img {
   font-size: 1.4rem;
   font-weight: 700;
   font-family: var(--serif);
+  cursor: pointer;
 }
 
 .more-avatar img { width: 30px; height: 30px; object-fit: contain; }
 
+.more-avatar.has-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+
+.more-avatar[data-avatar-upload]:hover::after,
+.more-avatar[data-avatar-upload]:focus-visible::after {
+  content: '📷';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: inherit;
+  font-size: 16px;
+}
+
 /* guest avatar becomes a fitted rounded tile when it holds the official logo */
-html[data-logo-source="official"] .more-avatar:not(.has-initial) {
+html[data-logo-source="official"] .more-avatar:not(.has-initial):not(.has-photo) {
   border-radius: 16px;
   background: none;
   border: 0;
 }
-html[data-logo-source="official"] .more-avatar:not(.has-initial) img {
+html[data-logo-source="official"] .more-avatar:not(.has-initial):not(.has-photo) img {
   width: 56px;
   height: 56px;
   border-radius: 16px;

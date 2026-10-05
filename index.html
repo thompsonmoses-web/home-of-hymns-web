@@ -32,7 +32,11 @@
 
   <div id="entryGate" class="overlay entry-gate" hidden>
     <div class="gate-card">
-      <div class="gate-emblem"><img class="logo" data-logo src="emblem.svg" alt="Home of Hymns"></div>
+      <button type="button" class="gate-emblem" id="gateAvatar" title="Add a profile photo">
+        <img class="logo" data-logo src="emblem.svg" alt="Home of Hymns">
+        <span class="photo-badge" aria-hidden="true">📷</span>
+      </button>
+      <button type="button" class="gate-photo-remove" id="gatePhotoRemove" hidden>Remove photo</button>
       <h2 class="gate-title">Welcome to Home of Hymns</h2>
       <p class="gate-sub">Enter your details to continue</p>
       <form id="gateForm" novalidate>
