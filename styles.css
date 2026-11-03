@@ -2776,6 +2776,34 @@ html[data-logo-source="official"] .about-emblem .cross-glyph { display: none; }
 .daily-open:hover { transform: translateY(-1px); box-shadow: 0 6px 18px color-mix(in srgb, var(--dc) 55%, transparent); }
 .daily-open:active { transform: translateY(0); }
 
+/* ---------- Whole-card clickability & search feedback ---------- */
+.featured,
+.daily-card,
+.brand {
+  cursor: pointer;
+}
+
+.featured:active,
+.daily-card:active,
+.quick-btn:active,
+.trad-card:active,
+.coll-card:active,
+.more-row:active,
+.hymn-card:active,
+.home-search:active {
+  transform: scale(0.985);
+}
+
+.search-wrap.flash #search {
+  border-color: var(--accent);
+  animation: searchPulse 0.8s ease-out 2;
+}
+
+@keyframes searchPulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  100% { box-shadow: 0 0 0 16px color-mix(in srgb, var(--accent) 0%, transparent); }
+}
+
 /* ---------- Keyboard focus ---------- */
 button:focus-visible,
 input:focus-visible,

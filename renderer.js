@@ -507,7 +507,7 @@ function renderHome() {
       <span>Search hymns, titles or numbers...</span>
     </button>
 
-    <div class="featured" style="--fc:${accent};--fct:${tintText(accent)}">
+    <div class="featured" data-feat-play="${featured.id}" style="--fc:${accent};--fct:${tintText(accent)}">
       <div class="featured-cross"><img data-logo src="${logoSrc()}" alt="Home of Hymns"><span class="cross-glyph">✟</span></div>
       <div class="featured-body">
         <span class="featured-tag">Featured Hymn</span>
@@ -517,7 +517,7 @@ function renderHome() {
       <button class="featured-play" data-feat-play="${featured.id}" title="Play tune">▶</button>
     </div>
 
-    <div class="daily-card" style="--dc:${dailyAccent}">
+    <div class="daily-card" data-feat-play="${daily.id}" style="--dc:${dailyAccent}">
       <div class="daily-left">
         <span class="daily-tag">☀️ Hymn of the Day</span>
         <b>${esc(daily.title)}</b>
@@ -549,7 +549,20 @@ function renderHome() {
     </div>
   </div>`;
   const fs = el('.home-search');
-  if (fs) fs.addEventListener('click', () => { const s = el('#search'); if (s) { el('#view').scrollTop = 0; s.focus(); } });
+  if (fs) fs.addEventListener('click', () => {
+    const s = el('#search');
+    if (!s) return;
+    const wrap = s.closest('.search-wrap');
+    if (wrap) {
+      wrap.classList.remove('flash');
+      void wrap.offsetWidth;
+      wrap.classList.add('flash');
+      setTimeout(() => wrap.classList.remove('flash'), 1700);
+    }
+    try { s.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) { /* ignore */ }
+    el('#view').scrollTop = 0;
+    s.focus();
+  });
   renderSidebar();
 }
 
@@ -1528,6 +1541,17 @@ el('#search').addEventListener('input', (e) => {
   if (state.view === 'home' && e.target.value) setView('hymns');
   else render();
 });
+
+// Clicking anywhere in the search bar (icon, padding) activates the field
+const searchWrap = document.querySelector('.search-wrap');
+if (searchWrap) searchWrap.addEventListener('click', (e) => {
+  const s = el('#search');
+  if (s && e.target !== s) s.focus();
+});
+
+// Brand logo/title returns home
+const brandEl = document.querySelector('.brand');
+if (brandEl) brandEl.addEventListener('click', () => setView('home'));
 
 function populateLangFilter() {
   const langs = [...new Set(hymns.map((h) => h.lang || 'en'))].sort();
