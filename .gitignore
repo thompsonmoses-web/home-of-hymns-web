@@ -3,3 +3,7 @@ node_modules/
 data/*.bak
 data/*.bak.*
 data/*.pre-*.bak
+data/*.bak_predeploy
+dist/
+edge_profile*/
+

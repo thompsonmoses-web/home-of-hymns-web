@@ -271,6 +271,87 @@ function matchesSearch(h) {
   return fold(parts.join(' ')).includes(q);
 }
 
+// Song identity used to hide book reprints: some source books print the same
+// text at two numbers (alternate tunes/settings), and the list must show each
+// distinct song only once — at its first number. Jump-to-number still opens
+// the hidden variant directly, and no data is dropped. (Mirror of Flutter
+// state.dart songKey / _buildCollectionList so both apps list identically.)
+function songKey(h) {
+  if (!h.lyrics || !h.lyrics.length) return 't:' + fold(h.title);
+  let buf = '';
+  for (const v of h.lyrics) buf += v.join(' ') + ' ';
+  if (h.chorus) buf += h.chorus.join(' ');
+  return fold(buf).replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+// Common words are dropped so that short shared phrases ("king", "lord"…)
+// cannot make two different songs look alike.
+const STOP_WORDS = new Set([
+  'the', 'and', 'for', 'with', 'that', 'this', 'was', 'are', 'has', 'have',
+  'had', 'his', 'her', 'thy', 'thou', 'thee', 'you', 'your', 'our', 'ours',
+  'mine', 'me', 'my', 'we', 'us', 'who', 'whom', 'not', 'but', 'all', 'any',
+  'can', 'may', 'will', 'shall', 'be', 'been', 'by', 'in', 'on', 'of', 'to',
+  'at', 'as', 'is', 'it', 'its', 'or', 'if', 'from', 'into', 'than', 'then',
+  'when', 'where', 'over', 'under', 'out', 'up', 'down', 'no', 'yes', 'do',
+  'does', 'did', 'he', 'she', 'they', 'them', 'there', 'here', 'what',
+  'which', 'how', 'before', 'after', 'between', 'again', 'once', 'each',
+  'every', 'both', 'few', 'more', 'most', 'other', 'such', 'only', 'own',
+  'same', 'so', 'very', 's', 't', 'don', 'now', 'let', 'lets', 'o', 'a',
+  'an', 'i',
+]);
+
+function songContentTokens(h) {
+  let buf = '';
+  if (!h.lyrics || !h.lyrics.length) {
+    buf = h.title;
+  } else {
+    for (const v of h.lyrics) buf += v.join(' ') + ' ';
+    if (h.chorus) buf += h.chorus.join(' ');
+  }
+  const out = new Set();
+  for (const w of fold(buf).split(/[^a-z0-9]+/)) {
+    if (w.length > 2 && !STOP_WORDS.has(w)) out.add(w);
+  }
+  return out;
+}
+
+// Two token sets describe the same song when they share nearly everything
+// of the shorter one and a good part of the longer one.
+function isSameSongTokens(a, b) {
+  if (!a.size || !b.size) return false;
+  const mn = Math.min(a.size, b.size);
+  const mx = Math.max(a.size, b.size);
+  if (mn < 6) return false;
+  let it = 0;
+  for (const w of a) if (b.has(w)) it++;
+  return it / mn >= 0.85 && it / mx >= 0.55;
+}
+
+const collListCache = new Map();
+
+function buildCollectionList(coll, section) {
+  const src = hymns
+    .filter((h) => h.collections.includes(coll) && (section === 'appendix' ? h.section === 'appendix' : !h.section))
+    .sort((a, b) => compareHymnNo(hymnNo(a), hymnNo(b)));
+  const seenText = new Set();
+  const result = [];
+  const keptTokens = [];
+  for (const h of src) {
+    const k = songKey(h);
+    if (seenText.has(k)) continue; // exact reprint
+    seenText.add(k);
+    const t = songContentTokens(h);
+    let dup = false;
+    for (const kept of keptTokens) {
+      if (isSameSongTokens(t, kept)) { dup = true; break; }
+    }
+    if (dup) continue; // reworded reprint of an already listed song
+    keptTokens.push(t);
+    result.push(h);
+  }
+  return result;
+}
+
 function visibleHymns() {
   let list = hymns;
   if (state.view === 'favorites') list = hymns.filter((h) => store.favorites.includes(h.id));
@@ -278,9 +359,11 @@ function visibleHymns() {
   if (state.view === 'library') list = state.libTab === 'favorites'
     ? hymns.filter((h) => store.favorites.includes(h.id))
     : store.history.map((id) => hymns.find((h) => h.id === id)).filter(Boolean);
-  if (state.view === 'collection') list = hymns
-    .filter((h) => h.collections.includes(state.collection) && (state.section === 'appendix' ? h.section === 'appendix' : !h.section))
-    .sort((a, b) => compareHymnNo(hymnNo(a), hymnNo(b)));
+  if (state.view === 'collection') {
+    const ck = state.collection + '|' + state.section;
+    if (!collListCache.has(ck)) collListCache.set(ck, buildCollectionList(state.collection, state.section));
+    list = collListCache.get(ck);
+  }
   if (state.lang !== 'all') list = list.filter((h) => (h.lang || 'en') === state.lang);
   return list.filter(matchesSearch);
 }
