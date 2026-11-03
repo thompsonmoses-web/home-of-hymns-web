@@ -815,8 +815,8 @@ input[type="range"]::-webkit-slider-thumb {
 @media (max-width: 960px) {
   body {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr;
-    grid-template-areas: "topbar" "rail" "main";
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas: "topbar" "rail" "main" "nav";
   }
 
   .hymnals {
@@ -835,6 +835,17 @@ input[type="range"]::-webkit-slider-thumb {
 
   .topbar { flex-wrap: wrap; height: auto; padding: 10px 14px; row-gap: 6px; }
   .topbar-controls { margin-left: auto; }
+
+  /* Bottom nav becomes a fixed bar on small screens (grid rows can't
+     constrain its label min-width without forcing horizontal overflow). */
+  .bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .view { padding-bottom: 78px; }
 }
 
 @media (max-width: 700px) {
@@ -1142,6 +1153,7 @@ html[data-logo-source="official"] .gate-emblem .logo {
 
 .bottom-nav {
   grid-area: nav;
+  min-width: 0;
   display: flex;
   align-items: stretch;
   justify-content: space-around;
@@ -1152,6 +1164,13 @@ html[data-logo-source="official"] .gate-emblem .logo {
   box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.05) inset;
   padding: 4px 4px calc(4px);
   z-index: 20;
+}
+
+.bottom-nav .nav-item span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bottom-nav .nav-item {
