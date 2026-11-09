@@ -916,7 +916,7 @@ function hymnView(h) {
       <div class="player-meta"><span class="num" style="background:${accent};color:${tintText(accent)}">No. ${hymnNo(h)}</span> <span class="player-cat">${esc(hymnCategory(h))}</span></div>
       <h2>${text.title}</h2>
       <p class="author">${byline(h)} · ${h.collections.map((c) => collectionName(c)).join(' · ')}</p>
-      ${window.TUNE_NAMES && window.TUNE_NAMES[h.id] ? `<div class="tune-chip">♩ Tune: ${esc(window.TUNE_NAMES[h.id])}</div>` : ''}
+      ${window.TUNE_NAMES && window.TUNE_NAMES[h.id] ? `<div class="tune-chip">♩ ${window.TUNE_NAMES[h.id].startsWith('Tune ') ? '' : 'Tune: '}${esc(window.TUNE_NAMES[h.id])}</div>` : ''}
     </div>
 
     <div class="player-controls" style="--pc:${accent}">
@@ -1477,7 +1477,7 @@ view.addEventListener('click', (e) => {
     const tn = window.TUNE_NAMES && window.TUNE_NAMES[h.id];
     const parts = [`No. ${hymnNo(h)} — ${t.title}`];
     parts.push(byline(h) + ' · ' + h.collections.map((c) => collectionName(c)).join(' · '));
-    if (tn) parts.push('Tune: ' + tn);
+    if (tn) parts.push(tn.startsWith('Tune ') ? tn : 'Tune: ' + tn);
     parts.push('');
     t.lyrics.forEach((v, i2) => {
       parts.push(i2 + 1 + '.');
