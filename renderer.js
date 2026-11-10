@@ -79,7 +79,7 @@ function activeHymnText(h) {
 
 function hymnLangs(h) {
   const orig = hymnOriginalLang(h);
-  const opts = [{ v: 'orig', l: langName(orig) + ' (Original)' }];
+  const opts = [{ v: 'orig', l: langName(orig) + ' ' + ui('(Original)') }];
   Object.keys(TRANSLATIONS).forEach((code) => {
     if (code === orig) return;
     if (TRANSLATIONS[code] && TRANSLATIONS[code][h.id]) opts.push({ v: code, l: langName(code) });
@@ -177,10 +177,10 @@ function yoBadge(c) {
   const n = yoCount(c);
   const on = yoOn(c);
   if (!n) {
-    return `<span class="yo-badge off" title="No Yoruba translation available in this hymnal" aria-disabled="true">YO</span>`;
+    return `<span class="yo-badge off" title="${ui('No Yoruba translation available in this hymnal')}" aria-disabled="true">YO</span>`;
   }
   return `<button class="yo-badge ${on ? 'on' : ''}" data-yo-toggle="${c.id}" style="--yc:${c.color};--yct:${tintText(c.color)}"
-    title="${on ? 'Showing Yoruba' : 'Show Yoruba'} · ${n} of ${collCount(c)} hymns translated"
+    title="${on ? ui('Showing Yoruba') : ui('Show Yoruba')} · ${n} ${ui('of')} ${collCount(c)} ${ui('hymns translated')}"
     aria-pressed="${on ? 'true' : 'false'}"><span class="yo-globe" aria-hidden="true"></span>YO</button>`;
 }
 
@@ -372,17 +372,17 @@ function sectionTabs() {
   const main = hymns.filter((h) => h.collections.includes(state.collection)).length;
   const app = hymns.filter((h) => h.collections.includes(state.collection) && h.section === 'appendix').length;
   const c = collectionBy(state.collection);
-  const label = (c && c.sectionLabel) || 'Appendix';
-  if (!app) return `<div class="section-tabs"><button class="tab on" data-section="main" style="--tc:${collectionColor(state.collection)}">All (${main})</button></div>`;
+  const label = ui((c && c.sectionLabel) || 'Appendix');
+  if (!app) return `<div class="section-tabs"><button class="tab on" data-section="main" style="--tc:${collectionColor(state.collection)}">${ui('All')} (${main})</button></div>`;
   return `
   <div class="section-tabs">
-    <button class="tab ${state.section !== 'appendix' ? 'on' : ''}" data-section="main" style="--tc:${collectionColor(state.collection)}">Main (${main - app})</button>
+    <button class="tab ${state.section !== 'appendix' ? 'on' : ''}" data-section="main" style="--tc:${collectionColor(state.collection)}">${ui('Main')} (${main - app})</button>
     <button class="tab ${state.section === 'appendix' ? 'on' : ''}" data-section="appendix" style="--tc:${collectionColor(state.collection)}">${label} (${app})</button>
   </div>`;
 }
 
 function hymnCards(list) {
-  if (!list.length) return '<div class="empty">No hymns found.</div>';
+  if (!list.length) return `<div class="empty">${ui('No hymns found.')}</div>`;
   return `<div class="hymn-list">` + list.map((h) => {
     const accent = hymnAccent(h);
     const chips = h.collections.map((cid) => {
@@ -396,12 +396,12 @@ function hymnCards(list) {
     // flag hymns that the Yoruba switch cannot cover, so the list is never silently mixed
     const yoNote = useYo(h) ? '' :
       (state.collection && state.yoCollections.has(state.collection) && !yoFor(h)
-        ? '<span class="yo-missing" title="No Yoruba translation for this hymn">EN</span>' : '');
+        ? `<span class="yo-missing" title="${ui('No Yoruba translation for this hymn')}">EN</span>` : '');
     return `
       <div class="hymn-card" data-open="${h.id}" style="border-top:4px solid ${accent}" tabindex="0">
 <span class="num" style="background:${accent};color:${tintText(accent)}">No. ${hymnNo(h)}</span>
         <h3 style="color:${shadeText(accent)}">${lang}${esc(title)} ${yoNote}</h3>
-        <div class="author">${byline(h)}${h.chorus ? ' · with refrain' : ''}</div>
+        <div class="author">${byline(h)}${h.chorus ? ' · ' + ui('with refrain') : ''}</div>
         <div class="chips">${chips}</div>
         <div class="card-foot">
           <span class="card-dur" style="color:${shadeText(accent)}">${fmtDur(hymnDuration(h))}</span>
@@ -427,16 +427,16 @@ const CATEGORIES = [
 ];
 
 function hymnCategory(h) {
-  if (h.category) return h.category;
+  if (h.category) return ui(h.category);
   const hay = (h.title + ' ' + h.author + ' ' + (h.lyrics[0] || []).join(' ')).toLowerCase();
   for (const [cat, keys] of CATEGORIES) {
-    if (keys.some((k) => hay.includes(k))) return cat;
+    if (keys.some((k) => hay.includes(k))) return ui(cat);
   }
-  return 'Worship & Devotion';
+  return ui('Worship & Devotion');
 }
 
 function byline(h) {
-  const a = h.author || 'Traditional';
+  const a = h.author || ui('Traditional');
   return h.year ? `${a}, ${h.year}` : a;
 }
 
@@ -472,10 +472,10 @@ function fmtDur(s) {
 
 function greeting() {
   const h = new Date().getHours();
-  if (h < 5) return 'Good Evening';
-  if (h < 12) return 'Good Morning';
-  if (h < 17) return 'Good Afternoon';
-  return 'Good Evening';
+  if (h < 5) return ui('Good Evening');
+  if (h < 12) return ui('Good Morning');
+  if (h < 17) return ui('Good Afternoon');
+  return ui('Good Evening');
 }
 
 function renderHome() {
@@ -495,40 +495,40 @@ function renderHome() {
 
   view.innerHTML = `
   <div class="home-view">
-    <h1 class="home-hello">${greeting()},<br><span>Welcome Back${who ? ', ' + esc(who) : ''}</span> <span class="pray">🙏</span></h1>
-    <p class="home-verse">“Let everything that has breath praise the Lord. Praise the Lord!” — Psalm 150:6</p>
+    <h1 class="home-hello">${greeting()},<br><span>${ui('Welcome Back')}${who ? ', ' + esc(who) : ''}</span> <span class="pray">🙏</span></h1>
+    <p class="home-verse">${ui('“Let everything that has breath praise the Lord. Praise the Lord!” — Psalm 150:6')}</p>
 
     <div class="home-stats">
-      <span>🌍 ${collections.length} hymnals</span><i>·</i><span>${langCount} languages</span><i>·</i><span>${hymns.length} hymns</span>
+      <span>🌍 ${collections.length} ${ui('hymnals')}</span><i>·</i><span>${langCount} ${ui('languages')}</span><i>·</i><span>${hymns.length} ${ui('hymns')}</span>
     </div>
 
     <button class="home-search" data-focus-search>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      <span>Search hymns, titles or numbers...</span>
+      <span>${ui('Search hymns, titles or numbers...')}</span>
     </button>
 
     <div class="featured" data-feat-play="${featured.id}" style="--fc:${accent};--fct:${tintText(accent)}">
       <div class="featured-cross"><img data-logo src="${logoSrc()}" alt="Home of Hymns"><span class="cross-glyph">✟</span></div>
       <div class="featured-body">
-        <span class="featured-tag">Featured Hymn</span>
+        <span class="featured-tag">${ui('Featured Hymn')}</span>
         <h2>${esc(featured.title)}</h2>
-        <p>No. ${hymnNo(featured)} · ${esc(hymnCategory(featured))} · ${esc(byline(featured))}</p>
+        <p>No. ${hymnNo(featured)} · ${esc(ui(hymnCategory(featured)))} · ${esc(byline(featured))}</p>
       </div>
-      <button class="featured-play" data-feat-play="${featured.id}" title="Play tune">▶</button>
+      <button class="featured-play" data-feat-play="${featured.id}" title="${ui('Play tune')}">▶</button>
     </div>
 
     <div class="daily-card" data-feat-play="${daily.id}" style="--dc:${dailyAccent}">
       <div class="daily-left">
-        <span class="daily-tag">☀️ Hymn of the Day</span>
+        <span class="daily-tag">☀️ ${ui('Hymn of the Day')}</span>
         <b>${esc(daily.title)}</b>
-        <small>No. ${hymnNo(daily)} · ${collectionName(daily.collections[0])}${isFavF ? ' · ★ saved' : ''}</small>
+        <small>No. ${hymnNo(daily)} · ${collectionName(daily.collections[0])}${isFavF ? ' · ' + ui('★ saved') : ''}</small>
       </div>
-      <button class="daily-open" data-feat-play="${daily.id}" style="--tint:${tintText(dailyAccent)}">Open</button>
+      <button class="daily-open" data-feat-play="${daily.id}" style="--tint:${tintText(dailyAccent)}">${ui('Open')}</button>
     </div>
 
     ${traditions.length ? `
     <div class="home-traditions">
-      <div class="traditions-title">Global Traditions</div>
+      <div class="traditions-title">${ui('Global Traditions')}</div>
       <div class="traditions-scroll">
         ${traditions.map((c) => `
           <div class="trad-cell">
@@ -542,10 +542,10 @@ function renderHome() {
     </div>` : ''}
 
     <div class="quick-grid">
-      <button class="quick-btn" data-quick="collections"><span class="qi" style="color:var(--accent)">📚</span><b>Hymn Collections</b><small>${collections.length} hymnals</small></button>
-      <button class="quick-btn" data-quick="favorites"><span class="qi" style="color:#f59e0b">⭐</span><b>Favorites</b><small>${favs} saved</small></button>
-      <button class="quick-btn" data-quick="history"><span class="qi" style="color:#0ea5e9">🕘</span><b>Recently Played</b><small>${recent} hymns</small></button>
-      <button class="quick-btn" data-quick="more"><span class="qi" style="color:#a78bfa">☰</span><b>More</b><small>Settings & more</small></button>
+      <button class="quick-btn" data-quick="collections"><span class="qi" style="color:var(--accent)">📚</span><b>${ui('Hymn Collections')}</b><small>${collections.length} ${ui('hymnals')}</small></button>
+      <button class="quick-btn" data-quick="favorites"><span class="qi" style="color:#f59e0b">⭐</span><b>${ui('Favorites')}</b><small>${favs} ${ui('saved')}</small></button>
+      <button class="quick-btn" data-quick="history"><span class="qi" style="color:#0ea5e9">🕘</span><b>${ui('Recently Played')}</b><small>${recent} ${ui('hymns')}</small></button>
+      <button class="quick-btn" data-quick="more"><span class="qi" style="color:#a78bfa">☰</span><b>${ui('More')}</b><small>${ui('Settings & more')}</small></button>
     </div>
   </div>`;
   const fs = el('.home-search');
@@ -568,7 +568,7 @@ function renderHome() {
 
 function renderHymnsPage() {
   const list = visibleHymns();
-  view.innerHTML = `<h1 class="view-title" style="color:var(--accent);border-bottom:3px solid var(--accent)">All Hymns <small>${list.length} total</small></h1>` + hymnCards(list);
+  view.innerHTML = `<h1 class="view-title" style="color:var(--accent);border-bottom:3px solid var(--accent)">${ui('All Hymns')} <small>${list.length} ${ui('total')}</small></h1>` + hymnCards(list);
   renderSidebar();
   const langSel = el('#langFilter');
   if (langSel && langSel.value !== state.lang) langSel.value = state.lang;
@@ -592,13 +592,13 @@ function renderCollections() {
     (!q || (c.name + ' ' + c.id).toLowerCase().includes(q))
   );
   const chips = CHIP_COLLECTIONS.filter((ch) => ch.id === 'all' || collections.some((c) => c.id === ch.id))
-    .map((ch) => `<button class="chip-filter ${state.chip === ch.id ? 'on' : ''}" data-chip="${ch.id}">${ch.label}</button>`).join('');
+    .map((ch) => `<button class="chip-filter ${state.chip === ch.id ? 'on' : ''}" data-chip="${ch.id}">${ui(ch.label)}</button>`).join('');
 
   view.innerHTML = `
-  <h1 class="view-title" style="color:var(--accent);border-bottom:3px solid var(--accent)">Hymn Collections <small>${collections.length} hymnals</small></h1>
+  <h1 class="view-title" style="color:var(--accent);border-bottom:3px solid var(--accent)">${ui('Hymn Collections')} <small>${collections.length} ${ui('hymnals')}</small></h1>
   <div class="coll-search-wrap">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" class="search-ic"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-    <input id="colSearch" class="coll-search" placeholder="Search collections...">
+    <input id="colSearch" class="coll-search" placeholder="${ui('Search collections...')}">
   </div>
   <div class="chip-row">${chips}</div>
   <div class="coll-grid">
@@ -609,13 +609,13 @@ function renderCollections() {
           ${collectionLogo(c)}
           <div class="coll-card-text">
             <b>${c.name}</b>
-            <small>${c.region || 'Traditional hymnal'} · ${collCount(c)} hymns</small>
+            <small>${ui(c.region || 'Traditional hymnal')} · ${collCount(c)} ${ui('hymns')}</small>
             ${yoOn(c) ? '<span class="coll-yo-tag">YORUBA</span>' : ''}
           </div>
           <span class="coll-arrow">›</span>
         </button>
         ${yoBadge(c)}
-      </div>`).join('') || '<div class="empty">No collections found.</div>'}
+      </div>`).join('') || `<div class="empty">${ui('No collections found.')}</div>`}
   </div>`;
   const cs = el('#colSearch');
   if (cs) { cs.value = state.colSearch; cs.addEventListener('input', (e) => { state.colSearch = e.target.value; renderCollections(); }); }
@@ -631,9 +631,9 @@ function renderLibrary() {
   ];
   if (state.libTab === 'collections') {
     view.innerHTML = `
-  <h1 class="view-title" style="color:var(--accent);border-bottom:3px solid var(--accent)">Library <small>your collections</small></h1>
+  <h1 class="view-title" style="color:var(--accent);border-bottom:3px solid var(--accent)">${ui('Library')} <small>${ui('your collections')}</small></h1>
   <div class="section-tabs lib-tabs">
-    ${tabs.map(([id, label, icon]) => `<button class="tab ${state.libTab === id ? 'on' : ''}" data-libtab="${id}" style="--tc:var(--accent)">${icon} ${label}</button>`).join('')}
+    ${tabs.map(([id, label, icon]) => `<button class="tab ${state.libTab === id ? 'on' : ''}" data-libtab="${id}" style="--tc:var(--accent)">${icon} ${ui(label)}</button>`).join('')}
   </div>
   <div class="coll-grid">
     ${collections.map((c) => `
@@ -641,7 +641,7 @@ function renderLibrary() {
         ${collectionLogo(c)}
         <div class="coll-card-text">
           <b>${c.name}</b>
-          <small>${collCount(c)} hymns</small>
+          <small>${collCount(c)} ${ui('hymns')}</small>
         </div>
         <span class="coll-arrow">›</span>
       </button>`).join('')}
@@ -650,9 +650,9 @@ function renderLibrary() {
     return;
   }
   view.innerHTML = `
-  <h1 class="view-title" style="color:var(--accent);border-bottom:3px solid var(--accent)">Library <small>your saved hymns</small></h1>
+  <h1 class="view-title" style="color:var(--accent);border-bottom:3px solid var(--accent)">${ui('Library')} <small>${ui('your saved hymns')}</small></h1>
   <div class="section-tabs lib-tabs">
-    ${tabs.map(([id, label, icon]) => `<button class="tab ${state.libTab === id ? 'on' : ''}" data-libtab="${id}" style="--tc:var(--accent)">${icon} ${label}</button>`).join('')}
+    ${tabs.map(([id, label, icon]) => `<button class="tab ${state.libTab === id ? 'on' : ''}" data-libtab="${id}" style="--tc:var(--accent)">${icon} ${ui(label)}</button>`).join('')}
   </div>
   ${list.length
     ? `<div class="lib-rows">` + list.map((h) => {
@@ -663,12 +663,12 @@ function renderLibrary() {
           <span class="lib-cover" style="border-color:${accent}">${cover ? collectionLogo(cover) : '🎵'}</span>
           <div class="lib-main">
             <b>No. ${hymnNo(h)} · ${esc(h.title)}</b>
-            <small>${esc(hymnCategory(h))} · ${esc(byline(h))}</small>
+            <small>${esc(ui(hymnCategory(h)))} · ${esc(byline(h))}</small>
           </div>
-          <button class="lib-menu" data-libmenu="${h.id}" title="Menu">⋮</button>
+          <button class="lib-menu" data-libmenu="${h.id}" title="${ui('Menu')}">⋮</button>
         </div>`;
       }).join('') + `</div>`
-    : `<div class="empty">${state.libTab === 'favorites' ? 'No favorites yet — tap ☆ on any hymn.' : 'No hymns read yet.'}</div>`}`;
+    : `<div class="empty">${state.libTab === 'favorites' ? ui('No favorites yet — tap ☆ on any hymn.') : ui('No hymns read yet.')}</div>`}`;
   renderSidebar();
 }
 
@@ -680,45 +680,45 @@ function renderMore() {
   const first = name ? name.split(/\s+/)[0] : '';
   const initial = name ? name[0].toUpperCase() : '';
   const photo = p && p.photo ? p.photo : '';
-  const sub = name ? (p.church || p.contact || 'Member') : 'Timeless Hymns for Every Generation';
+  const sub = name ? (p.church || p.contact || ui('Member')) : ui('Timeless Hymns for Every Generation');
   const favs = store.favorites.length;
   const recent = store.history.length;
   const langCount = [...new Set(hymns.map((h) => h.lang || 'en'))].length;
 
   view.innerHTML = `
-  <h1 class="view-title" style="color:var(--accent);border-bottom:3px solid var(--accent)">More</h1>
+  <h1 class="view-title" style="color:var(--accent);border-bottom:3px solid var(--accent)">${ui('More')}</h1>
   <div class="more-head">
-    <div class="more-avatar ${photo ? 'has-photo' : initial ? 'has-initial' : ''}" data-avatar-upload title="Click to change your profile photo">${photo ? `<img src="${photo}" alt="Profile photo">` : initial ? esc(initial) : `<img data-logo src="${logoSrc()}" alt="Home of Hymns">`}</div>
-    <div class="more-id"><b>${esc(first || 'Guest')}</b><small>${esc(sub)}</small></div>
-    ${name ? `<button class="more-edit" data-edit-profile>Edit</button>` : `<button class="more-edit" data-edit-profile>Set up</button>`}
+    <div class="more-avatar ${photo ? 'has-photo' : initial ? 'has-initial' : ''}" data-avatar-upload title="${ui('Click to change your profile photo')}">${photo ? `<img src="${photo}" alt="Profile photo">` : initial ? esc(initial) : `<img data-logo src="${logoSrc()}" alt="Home of Hymns">`}</div>
+    <div class="more-id"><b>${esc(first || ui('Guest'))}</b><small>${esc(sub)}</small></div>
+    ${name ? `<button class="more-edit" data-edit-profile>${ui('Edit')}</button>` : `<button class="more-edit" data-edit-profile>${ui('Set up')}</button>`}
   </div>
   <div class="more-stats">
-    <div class="more-stat"><b>${hymns.length.toLocaleString()}</b><small>Hymns</small></div>
-    <div class="more-stat"><b>${collections.length}</b><small>Hymnals</small></div>
-    <div class="more-stat"><b>${langCount}</b><small>Languages</small></div>
-    <div class="more-stat"><b>${favs}</b><small>Favorites</small></div>
+    <div class="more-stat"><b>${hymns.length.toLocaleString()}</b><small>${ui('Hymns')}</small></div>
+    <div class="more-stat"><b>${collections.length}</b><small>${ui('Hymnals')}</small></div>
+    <div class="more-stat"><b>${langCount}</b><small>${ui('Languages')}</small></div>
+    <div class="more-stat"><b>${favs}</b><small>${ui('Favorites')}</small></div>
   </div>
-  <div class="more-group-label">Preferences</div>
+  <div class="more-group-label">${ui('Preferences')}</div>
   <div class="more-list">
-    <div class="more-row"><span>🔔</span><b>Notifications</b><label class="switch"><input type="checkbox" id="notifToggle" ${notif ? 'checked' : ''}></label></div>
-    <div class="more-row"><span>🌓</span><b>Appearance</b><small class="more-side">${dark ? 'Night' : 'Day'}</small><label class="switch"><input type="checkbox" id="appearanceToggle" ${dark ? 'checked' : ''}></label></div>
-    <div class="more-row"><span>🗣</span><b>Language</b><select id="moreLang" class="more-select">${langOptionsHtml('en')}</select></div>
+    <div class="more-row"><span>🔔</span><b>${ui('Notifications')}</b><label class="switch"><input type="checkbox" id="notifToggle" ${notif ? 'checked' : ''}></label></div>
+    <div class="more-row"><span>🌓</span><b>${ui('Appearance')}</b><small class="more-side">${dark ? ui('Night') : ui('Day')}</small><label class="switch"><input type="checkbox" id="appearanceToggle" ${dark ? 'checked' : ''}></label></div>
+    <div class="more-row"><span>🗣</span><b>${ui('Language')}</b><select id="moreLang" class="more-select">${langOptionsHtml('en')}</select></div>
   </div>
-  <div class="more-group-label">Library</div>
+  <div class="more-group-label">${ui('Library')}</div>
   <div class="more-list">
-    <button class="more-row" data-quick="favorites"><span>⭐</span><b>Favorites</b><small class="more-side">${favs} saved ›</small></button>
-    <button class="more-row" data-quick="history"><span>🕘</span><b>Recently Read</b><small class="more-side">${recent} hymns ›</small></button>
+    <button class="more-row" data-quick="favorites"><span>⭐</span><b>${ui('Favorites')}</b><small class="more-side">${favs} ${ui('saved')} ›</small></button>
+    <button class="more-row" data-quick="history"><span>🕘</span><b>${ui('Recently Read')}</b><small class="more-side">${recent} ${ui('hymns')} ›</small></button>
   </div>
-  <div class="more-group-label">App</div>
+  <div class="more-group-label">${ui('App')}</div>
   <div class="more-list">
-    <button class="more-row accent-row" data-more="about"><span>✟</span><b>About Home of Hymns</b><small class="more-side">v1.0.0 ›</small></button>
+    <button class="more-row accent-row" data-more="about"><span>✟</span><b>${ui('About Home of Hymns')}</b><small class="more-side">v1.0.0 ›</small></button>
   </div>
-  <div class="more-foot">Home of Hymns · Timeless Hymns for Every Generation<br>v1.0.0 · Works offline · Your data stays on this device</div>`;
+  <div class="more-foot">Home of Hymns · ${ui('Timeless Hymns for Every Generation')}<br>v1.0.0 · ${ui('Works offline')} · ${ui('Your data stays on this device')}</div>`;
 
   if (el('#notifToggle')) {
     el('#notifToggle').addEventListener('change', (e) => {
       localStorage.setItem('notif', e.target.checked ? '1' : '0');
-      toast(e.target.checked ? 'Notifications on' : 'Notifications off');
+      toast(e.target.checked ? ui('Notifications on') : ui('Notifications off'));
     });
   }
   if (el('#appearanceToggle')) {
@@ -727,7 +727,7 @@ function renderMore() {
       if (n) { n.checked = e.target.checked; n.dispatchEvent(new Event('change', { bubbles: true })); }
       else document.body.classList.toggle('night', e.target.checked);
       const side = e.target.closest('.more-row') ? e.target.closest('.more-row').querySelector('.more-side') : null;
-      if (side) side.textContent = e.target.checked ? 'Night' : 'Day';
+      if (side) side.textContent = e.target.checked ? ui('Night') : ui('Day');
     });
   }
   if (el('#moreLang')) {
@@ -778,84 +778,84 @@ function renderAbout() {
   };
 
   const FEATURES = [
-    ['📖', 'Read offline', `All ${total.toLocaleString()} hymns live on this device — no internet needed.`],
-    ['🎶', 'Play the tune', tuneCount ? `Real melodies for ${tuneCount.toLocaleString()} hymns — with tempo control and a sing-along line highlight.` : 'Built-in tone player with tempo control and sing-along highlight.'],
-    ['🎼', 'Tune names & sharing', 'See each hymn\u2019s tune name (like EVENTIDE) and copy lyrics to share.'],
-    ['🇳🇬', 'Yoruba & world languages', `${langCount} languages, including Yoruba translations for ${yoTotal.toLocaleString()} hymns.`],
-    ['⭐', 'Favorites & history', 'Star the hymns you love and pick up right where you left off.'],
-    ['🔎', 'Jump by number', 'Press / or just start typing a number to open a hymn instantly.'],
-    ['🌙', 'Night mode & big text', 'Dark theme and adjustable text for evening service and easy reading.']
+    ['📖', ui('Read offline'), ui('All {n} hymns live on this device — no internet needed.').replace('{n}', total.toLocaleString())],
+    ['🎶', ui('Play the tune'), tuneCount ? ui('Real melodies for {n} hymns — with tempo control and a sing-along line highlight.').replace('{n}', tuneCount.toLocaleString()) : ui('Built-in tone player with tempo control and sing-along highlight.')],
+    ['🎼', ui('Tune names & sharing'), ui('See each hymn’s tune name (like EVENTIDE) and copy lyrics to share.')],
+    ['🇳🇬', ui('Yoruba & world languages'), ui('{n} languages, including Yoruba translations for {m} hymns.').replace('{n}', langCount).replace('{m}', yoTotal.toLocaleString())],
+    ['⭐', ui('Favorites & history'), ui('Star the hymns you love and pick up right where you left off.')],
+    ['🔎', ui('Jump by number'), ui('Press / or just start typing a number to open a hymn instantly.')],
+    ['🌙', ui('Night mode & big text'), ui('Dark theme and adjustable text for evening service and easy reading.')]
   ];
 
   const stats = [
-    [total.toLocaleString(), 'Hymns'],
-    [collections.length, 'Hymnals'],
-    [langCount, 'Languages'],
-    [favs, 'Favorites']
+    [total.toLocaleString(), ui('Hymns')],
+    [collections.length, ui('Hymnals')],
+    [langCount, ui('Languages')],
+    [favs, ui('Favorites')]
   ];
 
   view.innerHTML = `
   <div class="about-view">
-    <button class="about-back" data-about-back>← More</button>
+    <button class="about-back" data-about-back>← ${ui('More')}</button>
 
     <div class="about-hero">
       <span class="hero-sheen"></span>
       <div class="about-emblem"><img data-logo src="${logoSrc()}" alt="Home of Hymns"><span class="cross-glyph">✟</span></div>
       <h1>Home of Hymns</h1>
-      <p class="about-tag">Timeless Hymns for Every Generation</p>
-      <span class="about-version">Version 1.0.0</span>
-      ${first ? `<p class="about-user">Grace & peace, ${esc(first)} 🙏</p>` : ''}
+      <p class="about-tag">${ui('Timeless Hymns for Every Generation')}</p>
+      <span class="about-version">${ui('Version')} 1.0.0</span>
+      ${first ? `<p class="about-user">${ui('Grace & peace')}, ${esc(first)} 🙏</p>` : ''}
     </div>
 
     <div class="about-stats">
       ${stats.map(([n, l]) => `<div class="about-stat"><b>${n}</b><small>${l}</small></div>`).join('')}
     </div>
 
-    <div class="about-section">About this app</div>
+    <div class="about-section">${ui('About this app')}</div>
     <div class="about-panel about-intro">
-      <p>Home of Hymns brings together hymnals from Nigeria and around the world — Apostolic, Christ Apostolic, Redeemed, Baptist, Methodist, Lutheran, Catholic and more — in one simple app for church, family and personal worship.</p>
-      <p>Everything works fully offline. Your favorites, reading history and profile never leave this device.</p>
+      <p>${ui('Home of Hymns brings together hymnals from Nigeria and around the world — Apostolic, Christ Apostolic, Redeemed, Baptist, Methodist, Lutheran, Catholic and more — in one simple app for church, family and personal worship.')}</p>
+      <p>${ui('Everything works fully offline. Your favorites, reading history and profile never leave this device.')}</p>
     </div>
 
-    <div class="about-section">What you can do</div>
+    <div class="about-section">${ui('What you can do')}</div>
     <div class="about-panel about-features">
       ${FEATURES.map(([i, t, d]) => `
         <div class="feature-row"><span class="feature-ic">${i}</span><div><b>${t}</b><small>${d}</small></div></div>`).join('')}
     </div>
 
-    <div class="about-section">Your library <small>${collections.length} hymnals</small></div>
+    <div class="about-section">${ui('Your library')} <small>${collections.length} ${ui('hymnals')}</small></div>
     <div class="about-grid">
       ${collections.map((c) => `
         <button class="about-card" data-open-collection="${c.id}" style="--cc:${c.color}">
           ${collectionLogo(c)}
           <b>${esc(c.name)}</b>
-          <small>${collCount(c)} hymns</small>
+          <small>${collCount(c)} ${ui('hymns')}</small>
         </button>`).join('')}
     </div>
 
-    <div class="about-section">Sources & credits</div>
+    <div class="about-section">${ui('Sources & credits')}</div>
     <div class="about-panel about-credits">
       ${collections.map((c) => `
         <div class="credit-row"><i style="background:${c.color}"></i>
-          <div><b>${esc(c.name)}</b><small>${SOURCES[c.id] || 'Hymn collection'}</small></div>
+          <div><b>${esc(c.name)}</b><small>${SOURCES[c.id] || ui('Hymn collection')}</small></div>
         </div>`).join('')}
     </div>
 
-    <div class="about-section">Keyboard shortcuts</div>
+    <div class="about-section">${ui('Keyboard shortcuts')}</div>
     <div class="about-panel about-keys">
-      <div><span class="kbd-set"><kbd>/</kbd></span><span>Open jump-to-number</span></div>
-      <div><span class="kbd-set"><kbd>0</kbd>–<kbd>9</kbd></span><span>Start typing a hymn number</span></div>
-      <div><span class="kbd-set"><kbd>←</kbd><kbd>→</kbd></span><span>Previous / next hymn</span></div>
-      <div><span class="kbd-set"><kbd>↑</kbd><kbd>↓</kbd></span><span>Scroll verses</span></div>
-      <div><span class="kbd-set"><kbd>Esc</kbd></span><span>Go back</span></div>
+      <div><span class="kbd-set"><kbd>/</kbd></span><span>${ui('Open jump-to-number')}</span></div>
+      <div><span class="kbd-set"><kbd>0</kbd>–<kbd>9</kbd></span><span>${ui('Start typing a hymn number')}</span></div>
+      <div><span class="kbd-set"><kbd>←</kbd><kbd>→</kbd></span><span>${ui('Previous / next hymn')}</span></div>
+      <div><span class="kbd-set"><kbd>↑</kbd><kbd>↓</kbd></span><span>${ui('Scroll verses')}</span></div>
+      <div><span class="kbd-set"><kbd>Esc</kbd></span><span>${ui('Go back')}</span></div>
     </div>
 
-    <div class="about-note">🔒 <b>Private by design</b> — no account, no tracking, no internet required. Everything stays on this device.</div>
+    <div class="about-note">${ui('🔒 Private by design — no account, no tracking, no internet required. Everything stays on this device.')}</div>
 
     <div class="about-foot">
       <b>Home of Hymns</b>
-      <span>“Let everything that has breath praise the Lord. Praise the Lord!” — Psalm 150:6</span>
-      <small>Made with 🙏 · v1.0.0 · Timeless Hymns for Every Generation</small>
+      <span>${ui('“Let everything that has breath praise the Lord. Praise the Lord!” — Psalm 150:6')}</span>
+      <small>${ui('Made with')} 🙏 · v1.0.0 · ${ui('Timeless Hymns for Every Generation')}</small>
     </div>
   </div>`;
   renderSidebar();
@@ -876,26 +876,26 @@ function hymnView(h) {
   const next = vs.slice(idx + 1, idx + 4);
 
   const notes = `<div class="notes-panel ${state.notesOpen ? 'open' : ''}">
-    <b>About this hymn</b>
-    <p>No. ${hymnNo(h)} · “${esc(h.title)}” by ${esc(byline(h))}. Categories: ${esc(hymnCategory(h))} · ${h.collections.map((c) => collectionName(c)).join(', ')}.</p>
-    <p>Learn it from the numbered verses below, sing along to the tune, and save it to your favorites.</p>
+    <b>${ui('About this hymn')}</b>
+    <p>No. ${hymnNo(h)} · “${esc(h.title)}” ${ui('by')} ${esc(byline(h))}. ${ui('Categories')}: ${esc(ui(hymnCategory(h)))} · ${h.collections.map((c) => collectionName(c)).join(', ')}.</p>
+    <p>${ui('Learn it from the numbered verses below, sing along to the tune, and save it to your favorites.')}</p>
   </div>`;
 
   const verses = text.lyrics.map((v, i) => `
     <div class="verse">
       <div class="chorus-label" style="color:${accent}">
-        <span class="verse-num" style="border-color:${accent};color:${accent}">${i + 1}</span>Verse ${i + 1}
+        <span class="verse-num" style="border-color:${accent};color:${accent}">${i + 1}</span>${ui('Verse')} ${i + 1}
       </div>${v.map((line) => `<div class="line">${line}</div>`).join('\n')}
     </div>`).join('');
 
   const chorus = text.chorus ? `<div class="chorus" style="border-left:4px solid ${accent}">
-      <div class="chorus-label" style="color:${accent}">Refrain</div>${text.chorus.map((l) => `<div class="line">${l}</div>`).join('\n')}
+      <div class="chorus-label" style="color:${accent}">${ui('Refrain')}</div>${text.chorus.map((l) => `<div class="line">${l}</div>`).join('\n')}
     </div>` : '';
 
   const langOpts = hymnLangs(h);
 
   const nextHtml = next.length ? `<div class="upnext">
-    <div class="upnext-title" style="color:${accent}">Up Next</div>
+    <div class="upnext-title" style="color:${accent}">${ui('Up Next')}</div>
     ${next.map((n) => `<button class="upnext-row" data-open="${n.id}"><b>No. ${hymnNo(n)}</b><span>${esc(n.title)}</span><i>${fmtDur(hymnDuration(n))}</i></button>`).join('')}
   </div>` : '';
 
@@ -913,18 +913,18 @@ function hymnView(h) {
     </div>
 
     <div class="player-head" style="--pc:${accent}">
-      <div class="player-meta"><span class="num" style="background:${accent};color:${tintText(accent)}">No. ${hymnNo(h)}</span> <span class="player-cat">${esc(hymnCategory(h))}</span></div>
+      <div class="player-meta"><span class="num" style="background:${accent};color:${tintText(accent)}">No. ${hymnNo(h)}</span> <span class="player-cat">${esc(ui(hymnCategory(h)))}</span></div>
       <h2>${text.title}</h2>
       <p class="author">${byline(h)} · ${h.collections.map((c) => collectionName(c)).join(' · ')}</p>
-      ${window.TUNE_NAMES && window.TUNE_NAMES[h.id] ? `<div class="tune-chip">♩ ${window.TUNE_NAMES[h.id].startsWith('Tune ') ? '' : 'Tune: '}${esc(window.TUNE_NAMES[h.id])}</div>` : ''}
+      ${window.TUNE_NAMES && window.TUNE_NAMES[h.id] ? `<div class="tune-chip">♩ ${window.TUNE_NAMES[h.id].startsWith('Tune ') ? '' : ui('Tune:') + ' '}${esc(window.TUNE_NAMES[h.id])}</div>` : ''}
     </div>
 
     <div class="player-controls" style="--pc:${accent}">
-      <button data-shuffle class="${state.shuffle ? 'on' : ''}" title="Shuffle">🔀</button>
-      <button data-prev title="Previous">⏮</button>
-      <button data-fav="${h.id}" class="play-fav ${isFav ? 'faved' : ''}" style="border-color:${accent};color:${isFav ? tintText(accent) : shadeText(accent)};background:${isFav ? accent : 'transparent'}">${isFav ? '★ Saved' : '☆'}</button>
-      <button data-next title="Next">⏭</button>
-      <button data-tune title="Play tune">${playingTune ? '■ Stop' : '♪ Play'}</button>
+      <button data-shuffle class="${state.shuffle ? 'on' : ''}" title="${ui('Shuffle')}">🔀</button>
+      <button data-prev title="${ui('Previous')}">⏮</button>
+      <button data-fav="${h.id}" class="play-fav ${isFav ? 'faved' : ''}" style="border-color:${accent};color:${isFav ? tintText(accent) : shadeText(accent)};background:${isFav ? accent : 'transparent'}">${isFav ? ui('★ Saved') : '☆'}</button>
+      <button data-next title="${ui('Next')}">⏭</button>
+      <button data-tune title="${ui('Play tune')}">${playingTune ? ui('■ Stop') : ui('♪ Play')}</button>
     </div>
 
     <div class="timeline">
@@ -936,27 +936,27 @@ function hymnView(h) {
     <div class="player-tools">
       <button data-aa="-">A−</button>
       <button data-aa="+">A+</button>
-      <button data-tempo title="Playback speed">♩ ${state.tempo}×</button>
-      <button data-copy title="Copy these lyrics">⎘ Copy</button>
-      <button data-notes>${state.notesOpen ? 'Hide Notes' : 'Show Notes'}</button>
-      <button data-fav="${h.id}" class="${isFav ? 'faved' : ''}">${isFav ? '★ Favorite' : '☆ Add to Favorites'}</button>
+      <button data-tempo title="${ui('Playback speed')}">♩ ${state.tempo}×</button>
+      <button data-copy title="${ui('Copy these lyrics')}">${ui('⎘ Copy')}</button>
+      <button data-notes>${state.notesOpen ? ui('Hide Notes') : ui('Show Notes')}</button>
+      <button data-fav="${h.id}" class="${isFav ? 'faved' : ''}">${isFav ? ui('★ Favorite') : ui('☆ Add to Favorites')}</button>
     </div>
 
     <div class="hymn-actions player-visible">
-      <button data-back>← Back</button>
+      <button data-back>${ui('← Back')}</button>
     </div>
     <div class="hymn-lang-row" style="--lc:${accent}">
-      <span class="hymn-lang-label">🌐 Read in</span>
-      <select class="hymn-lang-select" data-langsel aria-label="Read this hymn in another language">
+      <span class="hymn-lang-label">${ui('🌐 Read in')}</span>
+      <select class="hymn-lang-select" data-langsel aria-label="${ui('Read this hymn in another language')}">
         ${langOpts.map((o) => `<option value="${o.v}" ${currentLangValue(h) === o.v ? 'selected' : ''}>${esc(o.l)}</option>`).join('')}
       </select>
     </div>
 
     ${notes}
-    <div class="hymn-keys"><kbd>←</kbd> prev &middot; <kbd>→</kbd> next hymn &middot; <kbd>↑</kbd><kbd>↓</kbd> verses &middot; <kbd>/</kbd> jump &middot; <kbd>Esc</kbd> back</div>
+    <div class="hymn-keys"><kbd>←</kbd> ${ui('prev')} &middot; <kbd>→</kbd> ${ui('next hymn')} &middot; <kbd>↑</kbd><kbd>↓</kbd> ${ui('verses')} &middot; <kbd>/</kbd> ${ui('jump')} &middot; <kbd>Esc</kbd> ${ui('back')}</div>
     <div class="lyrics" style="--pc:${accent}">${verses}${chorus}</div>
     ${nextHtml}
-    <div class="byline">Hymn ${h.id} · ${h.title}</div>
+    <div class="byline">${ui('Hymn')} ${h.id} · ${h.title}</div>
   </div>`;
 }
 
@@ -977,8 +977,8 @@ function render() {
     const tabs = sectionTabs();
     const c = collectionBy(state.collection);
     const yoBar = c ? `<div class="yo-bar">${yoBadge(c)}<span class="yo-bar-note">${yoOn(c)
-      ? `Showing Yoruba where translated (${yoCount(c)} of ${collCount(c)} hymns)`
-      : 'Switch this hymnal to Yoruba'}</span></div>` : '';
+      ? `${ui('Showing Yoruba where translated')} (${yoCount(c)} ${ui('of')} ${collCount(c)} ${ui('hymns')})`
+      : ui('Switch this hymnal to Yoruba')}</span></div>` : '';
     view.innerHTML = `<h1 class="view-title" style="color:${t.color};border-bottom:3px solid ${t.color}">${t.html}</h1>${tabs}${yoBar}` + hymnCards(visibleHymns());
     renderSidebar();
   }
@@ -1302,7 +1302,7 @@ function openHymn(id) {
  * ------------------------------------------------------------------ */
 
 function copyText(txt) {
-  const done = () => toast('Lyrics copied to clipboard');
+  const done = () => toast(ui('Lyrics copied to clipboard'));
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(txt).then(done, () => fallbackCopy(txt, done));
   } else fallbackCopy(txt, done);
@@ -1319,7 +1319,7 @@ function fallbackCopy(txt, done) {
     document.execCommand('copy');
     document.body.removeChild(ta);
     done();
-  } catch (e) { toast('Copy failed'); }
+  } catch (e) { toast(ui('Copy failed')); }
 }
 
 view.addEventListener('click', (e) => {
@@ -1359,10 +1359,10 @@ view.addEventListener('click', (e) => {
     const id = Number(e.target.closest('.lib-menu').dataset.libmenu);
     if (state.libTab === 'favorites') {
       store.favorites = store.favorites.filter((x) => x !== id);
-      toast('Removed from favorites');
+      toast(ui('Removed from favorites'));
     } else {
       store.history = store.history.filter((x) => x !== id);
-      toast('Removed from history');
+      toast(ui('Removed from history'));
     }
     render();
     return;
@@ -1385,7 +1385,7 @@ view.addEventListener('click', (e) => {
       saveUserProfile(p);
       renderUserChip();
       render();
-      toast('Profile photo updated');
+      toast(ui('Profile photo updated'));
     });
     return;
   }
@@ -1414,7 +1414,7 @@ view.addEventListener('click', (e) => {
   const shuffleBtn = e.target.closest('[data-shuffle]');
   if (shuffleBtn && state.hymnOpen) {
     state.shuffle = !state.shuffle;
-    toast(state.shuffle ? 'Shuffle on' : 'Shuffle off');
+    toast(state.shuffle ? ui('Shuffle on') : ui('Shuffle off'));
     render();
     return;
   }
@@ -1423,7 +1423,7 @@ view.addEventListener('click', (e) => {
   if (prevBtn && state.hymnOpen) {
     const list = visibleHymns();
     const idx = list.findIndex((h) => h.id === state.hymnOpen);
-    if (idx > 0) openHymn(list[idx - 1].id); else toast('Already at the first hymn');
+    if (idx > 0) openHymn(list[idx - 1].id); else toast(ui('Already at the first hymn'));
     return;
   }
 
@@ -1436,7 +1436,7 @@ view.addEventListener('click', (e) => {
       return;
     }
     const idx = list.findIndex((h) => h.id === state.hymnOpen);
-    if (idx > -1 && idx < list.length - 1) openHymn(list[idx + 1].id); else toast('End of the list');
+    if (idx > -1 && idx < list.length - 1) openHymn(list[idx + 1].id); else toast(ui('End of the list'));
     return;
   }
 
@@ -1464,7 +1464,7 @@ view.addEventListener('click', (e) => {
     state.tempo = opts[(Math.max(0, opts.indexOf(state.tempo)) + 1) % opts.length];
     try { localStorage.setItem('tempo', String(state.tempo)); } catch (e2) { /* ignore */ }
     if (playingTune) stopTune();
-    toast('Tempo ' + state.tempo + '×');
+    toast(ui('Tempo') + ' ' + state.tempo + '×');
     render();
     return;
   }
@@ -1477,7 +1477,7 @@ view.addEventListener('click', (e) => {
     const tn = window.TUNE_NAMES && window.TUNE_NAMES[h.id];
     const parts = [`No. ${hymnNo(h)} — ${t.title}`];
     parts.push(byline(h) + ' · ' + h.collections.map((c) => collectionName(c)).join(' · '));
-    if (tn) parts.push(tn.startsWith('Tune ') ? tn : 'Tune: ' + tn);
+    if (tn) parts.push(tn.startsWith('Tune ') ? tn : ui('Tune:') + ' ' + tn);
     parts.push('');
     t.lyrics.forEach((v, i2) => {
       parts.push(i2 + 1 + '.');
@@ -1485,11 +1485,11 @@ view.addEventListener('click', (e) => {
       parts.push('');
     });
     if (t.chorus) {
-      parts.push('Refrain:');
+      parts.push(ui('Refrain:'));
       t.chorus.forEach((l) => parts.push(l));
       parts.push('');
     }
-    parts.push('— Copied from Home of Hymns');
+    parts.push(ui('— Copied from Home of Hymns'));
     copyText(parts.join('\n'));
     return;
   }
@@ -1501,7 +1501,7 @@ view.addEventListener('click', (e) => {
     if (favs.includes(id)) favs = favs.filter((x) => x !== id);
     else favs.push(id);
     store.favorites = favs;
-    toast(favs.includes(id) ? 'Added to favorites' : 'Removed from favorites');
+    toast(favs.includes(id) ? ui('Added to favorites') : ui('Removed from favorites'));
     render();
     return;
   }
@@ -1522,7 +1522,7 @@ view.addEventListener('change', (e) => {
       try { localStorage.setItem('yoCollections', JSON.stringify([...state.yoCollections])); } catch (err) { /* ignore */ }
     }
     setHymnLang(sel.value);
-    toast('Reading this hymn in ' + (sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : ''));
+    toast(ui('Reading this hymn in') + ' ' + (sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : ''));
     render();
   }
 });
@@ -1556,7 +1556,7 @@ if (brandEl) brandEl.addEventListener('click', () => setView('home'));
 function populateLangFilter() {
   const langs = [...new Set(hymns.map((h) => h.lang || 'en'))].sort();
   const sel = el('#langFilter');
-  sel.innerHTML = '<option value="all">All Languages</option>' +
+  sel.innerHTML = `<option value="all">${ui('All Languages')}</option>` +
     langs.map((l) => `<option value="${l}">${langName(l)}</option>`).join('');
   sel.value = state.lang;
 }
@@ -1621,10 +1621,10 @@ function pickProfilePhoto(cb) {
 
 function cropToAvatar(file, cb) {
   const fr = new FileReader();
-  fr.onerror = () => toast('Could not read that image');
+  fr.onerror = () => toast(ui('Could not read that image'));
   fr.onload = () => {
     const img = new Image();
-    img.onerror = () => toast('Unsupported image format');
+    img.onerror = () => toast(ui('Unsupported image format'));
     img.onload = () => {
       const S = 256;
       try {
@@ -1635,7 +1635,7 @@ function cropToAvatar(file, cb) {
         const side = Math.min(img.width, img.height);
         ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, S, S);
         cb(c.toDataURL('image/jpeg', 0.85));
-      } catch (e) { toast('Could not read that image'); }
+      } catch (e) { toast(ui('Could not read that image')); }
     };
     img.src = fr.result;
   };
@@ -1651,12 +1651,12 @@ function updateGateAvatar() {
     img.removeAttribute('data-logo');
     img.src = photo;
     img.classList.add('photo');
-    btn.title = 'Change profile photo';
+    btn.title = ui('Change profile photo');
   } else {
     img.setAttribute('data-logo', '');
     img.src = logoSrc();
     img.classList.remove('photo');
-    btn.title = 'Add a profile photo';
+    btn.title = ui('Add a profile photo');
   }
   const rm = el('#gatePhotoRemove');
   if (rm) rm.hidden = !photo;
@@ -1681,8 +1681,8 @@ function renderUserChip() {
   if (!p || !p.name) { chip.hidden = true; return; }
   const first = String(p.name).trim().split(/\s+/)[0];
   chip.hidden = false;
-  chip.innerHTML = (p.photo ? `<img src="${p.photo}" alt="">` : '') + 'Welcome, ' + esc(first);
-  chip.title = p.name + (p.church ? ' · ' + p.church : '') + ' — click to edit';
+  chip.innerHTML = (p.photo ? `<img src="${p.photo}" alt="">` : '') + ui('Welcome') + ', ' + esc(first);
+  chip.title = p.name + (p.church ? ' · ' + p.church : '') + ' — ' + ui('click to edit');
 }
 
 function openGate() {
@@ -1722,7 +1722,7 @@ function initGate() {
       closeGate();
       renderUserChip();
       render();
-      toast('Welcome, ' + name.split(/\s+/)[0] + '!');
+      toast(ui('Welcome') + ', ' + name.split(/\s+/)[0] + '!');
     });
   }
   const avatar = el('#gateAvatar');
@@ -1732,7 +1732,7 @@ function initGate() {
       pickProfilePhoto((dataUrl) => {
         gatePhoto = dataUrl;
         updateGateAvatar();
-        toast('Photo added — press Enter to save');
+        toast(ui('Photo added — press Enter to save'));
       });
     });
   }
@@ -1809,7 +1809,7 @@ function jumpCandidate() {
 }
 
 function jumpScopeName() {
-  return state.view === 'collection' ? collectionName(state.collection) : 'all hymns';
+  return state.view === 'collection' ? collectionName(state.collection) : ui('all hymns');
 }
 
 function updateJumpPreview() {
@@ -1818,13 +1818,13 @@ function updateJumpPreview() {
   if (!jumpDigits) { p.textContent = ''; p.classList.remove('found'); return; }
   const c = jumpCandidate();
   if (c) { p.textContent = hymnNo(c) + ' · ' + c.title; p.classList.add('found'); }
-  else { p.textContent = 'none in ' + jumpScopeName(); p.classList.remove('found'); }
+  else { p.textContent = ui('none in') + ' ' + jumpScopeName(); p.classList.remove('found'); }
 }
 
 function submitJump() {
   const c = jumpCandidate();
   if (c) { closeJump(); openHymn(c.id); return; }
-  toast(jumpDigits ? 'No hymn #' + jumpDigits + ' in ' + jumpScopeName() : 'Type a hymn number');
+  toast(jumpDigits ? ui('No hymn #') + jumpDigits + ' ' + ui('in') + ' ' + jumpScopeName() : ui('Type a hymn number'));
   closeJump();
 }
 
@@ -1892,15 +1892,33 @@ if (el('#jumpInput')) {
 }
 
 function titleFor() {
-  if (state.view === 'favorites') return { html: `Favorites <small>${visibleHymns().length} saved</small>`, color: '#f59e0b' };
-  if (state.view === 'history') return { html: `History <small>recently read</small>`, color: '#0ea5e9' };
+  if (state.view === 'favorites') return { html: `${ui('Favorites')} <small>${visibleHymns().length} ${ui('saved')}</small>`, color: '#f59e0b' };
+  if (state.view === 'history') return { html: `${ui('History')} <small>${ui('recently read')}</small>`, color: '#0ea5e9' };
   if (state.view === 'collection') {
-    const s = state.section === 'appendix' ? 'Appendix' : 'Main';
+    const s = state.section === 'appendix' ? ui('Appendix') : ui('Main');
     const c = collections.find((x) => x.id === state.collection);
-    return { html: `${c ? collectionLogo(c) : ''} <span>${collectionName(state.collection)}</span> <small>${s} · ${visibleHymns().length} hymns</small>`, color: collectionColor(state.collection) };
+    return { html: `${c ? collectionLogo(c) : ''} <span>${collectionName(state.collection)}</span> <small>${s} · ${visibleHymns().length} ${ui('hymns')}</small>`, color: collectionColor(state.collection) };
   }
-  return { html: `All Hymns <small>${visibleHymns().length} total</small>`, color: 'var(--accent)' };
+  return { html: `${ui('All Hymns')} <small>${visibleHymns().length} ${ui('total')}</small>`, color: 'var(--accent)' };
 }
+
+/* ------------------------------------------------------------------
+ *  Interface language toggle (English ⇄ Yoruba)
+ *  Flips the chrome language AND the lyric language together, so one
+ *  tap makes the whole app Yoruba (lyrics fall back to the original
+ *  language for hymns with no Yoruba translation).
+ * ------------------------------------------------------------------ */
+function toggleUiLang() {
+  setUiLang(window.UI_LANG === 'yo' ? 'en' : 'yo');
+  setHymnLang(window.UI_LANG === 'yo' ? 'yo' : 'orig');
+  applyStaticUi();
+  populateLangFilter();
+  renderUserChip();
+  render();
+  renderSidebar();
+}
+
+if (el('#uiLangBtn')) el('#uiLangBtn').addEventListener('click', toggleUiLang);
 
 render();
 updateActiveNav();

@@ -394,6 +394,33 @@ kbd {
 .jump-btn kbd { transition: color 0.15s; }
 .jump-btn:hover kbd { color: var(--accent-text); }
 
+/* EN | YO interface-language toggle */
+.ui-lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s;
+  line-height: 1;
+}
+.ui-lang-btn .uil {
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: var(--sans);
+  color: var(--text-soft);
+  letter-spacing: 0.04em;
+  transition: all 0.15s;
+}
+.ui-lang-btn .uil.on { background: var(--accent); color: #fff; }
+.ui-lang-btn:hover { border-color: var(--accent); }
+
 .jump {
   position: absolute;
   top: 70px;
